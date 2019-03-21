@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Digit App</title>
+  </head>
+  <body>
+	<audio id="click_sound">
+		<source src="adriantnt_u_click.mp3" type="audio/mpeg">
+	</audio>
+	<div class="container" style="background-color: #ECECEC"> 
+		<div class="card text-center text-white bg-secondary mb-1" id="home" style="font-size:130%;"><div class="card-header"><img src="./images/favicon.png">
+			&nbsp;&nbsp;&nbsp;&nbsp;GubboIT - Digit</div></div>
+			
+		<div class="row">
+		<div class="col"> <!-- LEFT SIDE -->
+		<div class="row">
+			<div class="col">
+
+				<canvas id="canvas" width="200" height="200" style="border:1px solid #0000FF;"></canvas>
+			</div>
+			<div class="col">
+				<div class="card mb-1">
+					<div class="card-body">
+						<div class="card-title"><b>Draw a digit 0-9...</b></div>
+						<button type="button" class="btn btn-primary mr-2" id="predict_btn">Predict</button>
+						<button type="button" class="btn btn-secondary" id="clear_btn">Clear</button>			
+						<h5 class="mt-2"><span id="pred" class="badge badge-success mr-2">Digit: ?</span><span id="model" class="badge badge-secondary">?</span></h5>
+						<h6 id="res"></h6>				
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+
+			<div class="col">
+				<canvas class="my-1" id="histo" width="200" height="100" style="border:1px solid #0000FF;"></canvas>
+			</div>
+			<div class="col">
+	
+				<button type="button" class="btn btn-secondary mt-1 mr-1" id="left_btn">&lArr;</button>
+				<button type="button" class="btn btn-secondary mt-1 mr-1" id="right_btn">&rArr;</button>
+				<button type="button" class="btn btn-secondary mt-1 mr-1" id="up_btn">&uArr;</button>
+				<button type="button" class="btn btn-secondary mt-1 mr-1" id="down_btn">&dArr;</button>
+				<button type="button" class="btn btn-secondary mt-1 mr-1" id="zoom_out_btn"><b>-</b></button>
+				<button type="button" class="btn btn-secondary mt-1 " id="zoom_in_btn"><b>+</b></button>
+				
+				<div class="dropdown">
+					<button class="btn btn-secondary dropdown-toggle my-2" type="button" data-toggle="dropdown">Actions/Help</button>
+						<div class="dropdown-menu">
+							<button class="dropdown-item" type="button" id="inverse_btn">Invert</button>
+							<button class="dropdown-item" type="button" id="toggle_btn">Toggle model</button>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="#help">Help</a>
+							<a class="dropdown-item" href="#more_info">More info</a>
+							<a class="dropdown-item" href="https://gubboit.se">GubboIT</a>
+					</div>
+				</div>
+			</div>					
+		</div> 
+		<div class="card">
+		  <div id="help" class="card-header text-center"><b>HELP</b><a href="#home" class="ml-2 badge badge-primary">Home</a></div>
+		  <div class="card-body">
+				<h5 class="card-title mb-2 text-primary">Get started</h5>		  
+				<p class="card-text">This app demonstrates <b>Digit Recognition</b> using <b>Deep Learning</b>. 
+				Draw a digit 0-9 (centered and not too small) in the drawing area then <b>Predict</b> and you will get a
+					prediction - a digit 0-9. Draw digits (bad or good) and use the buttons to modify the image to be predicted.</p>
+				<h5 class="card-title mb-2 text-primary">How does it work?</h5>
+				<p class="card-text">The pixels (value is 0-255) of the drawn image is input to a <b>model</b> that transforms the input pixels 
+					(number of pixles is 784) into 10 values (the predictions) that can be interpreted as the probability that the drawn 
+					digit is the digit 0-9. The model contains almost 600,000 parameters and various layers that handle and transform the 
+					input pixels. The values of the parameters are learned via a process called <b>training</b> on a large number of labeled images. 
+					Labeled means that each input image is associated with a number 0-9 telling what digit the image looks like. 
+					The training process is very slow so this app only predicts using a saved model.</p>
+					<p>The prediction is just a mapping of 784 values into 10 values. So <b>no magic</b> even if it is <b>Deep Learning</b>.</p>
+				<h5 class="card-title mb-2 text-primary">Input and output</h5>
+				<ul class="list-group">
+					<li class="list-group-item"><b>Drawing area:</b> Draw in this area.</li>
+					<li class="list-group-item"><b>Predict button:</b> To get a prediction.</li>
+					<li class="list-group-item"><b>Clear button:</b> To clear the drawing area.</li>
+					<li class="list-group-item"><b>Digit ?:</b> Shows the predicted digit.</li>
+					<li class="list-group-item"><b>white/black_white:</b> Shows the used model. There are two models: <b>white</b> is trained 
+					  on images drawn with a white pen on a black background. Besides this <b>black_white</b> is trained on images drawn with a 
+					  black pen on a white background.</li>
+					<li class="list-group-item"><b>Predictions:</b> 10 values. Shows the probability of digit 0-9. The digit with max value is put into 
+					  the output field <b>Digit</b>. The sum of the predictions is =1.</li>
+					<li class="list-group-item"><b>Histogram:</b> Histogram of the predictions.</li>
+					<li class="list-group-item"><b>Arrow buttons:</b> Moves the drawn digit.</li>
+					<li class="list-group-item"><b>-/+:</b> Zoom out or zoom in the drawing area.</li>
+					<li class="list-group-item"><b>Invert button(Actions/Help):</b> Invert the colours of the drawing area (and image).</li>
+					<li class="list-group-item"><b>Toggle model button (Actions/Help):</b> Use the other model for predictions.</li>					  
+				</ul>
+				
+				<h5 class="card-title my-2 text-primary">Some findings</h5>
+				<p class="card-text">Among the findings below there are some shortcomings but don't worry there are ways (not describe here) 
+				to handle the problems.</p>
+				<ul class="list-group">
+					<li class="list-group-item"><b>Digit 1 is hard.</b> Digit 1 seems to be hardest to predict.</li>
+					<li class="list-group-item"><b>Size matters.</b> Draw a digit and use <b>Predict</b>  and <b>- (zoom out)</b>  a number of times and see how the 
+						histogram changes.</li>
+					<li class="list-group-item"><b>Position matters.</b>  Draw a digit and use <b>Predict</b>  and the <b>arrow buttons</b>  a number of times and see how the 
+						histogram changes.</li>
+					<li class="list-group-item"><b>Colour matters.</b> Use model <b>white</b>. Draw a digit and then <b>Predict</b>. Now <b>Invert</b> 
+						(under <b>Actions/Help</b>). <b>Predict</b> again and the histogram should indicate a worse prediction. Now <b>Toggle model</b> 
+						(under <b>Actions/Help</b>) to the <b>black_white</b> model. <b>Predict</b> again and the prediction should be improved.</li>
+					<li class="list-group-item"><b>Model black_white is better.</b> Use model <b>white</b>. Draw a digit and position the digit to get a 
+						worse prediction. <b>Toggle model</b> and <b>Predict</b> and now the prediction should be improved. The reason is that model black_white is 
+						trained on more data.</li>
+					<li class="list-group-item"><b>Blurring is good.</b> Draw a digit and position the digit to get a worse prediction. 
+						<b>+ (zoom in)</b> four times and then <b>- (zoom out)</b> four times. The digit is now a little blurred. <b>Predict</b> again and now the prediction improves. 
+						The reason is probably that the training data is blurred because it is not produced in the same artificial way as in our 
+						drawing area.</li>
+					<li class="list-group-item"><b>Real probabilities?</b> Are the predictions real probabilities? Probably not. When the drawing area is empty and the model is
+						<b>black_white</b> then the prediction for digit 1 is around 0.4. How to interpret?</li>		
+				</ul>
+				<a href="#home" class="ml-2 badge badge-primary">Home</a>
+		  </div>
+		</div>	
+		</div> <!-- END LEFT SIDE -->			
+		<div class="col"> <!-- RIGHT SIDE -->
+			<div class="card">
+			  <div id="more_info" class="card-header text-center"><b>MORE INFO</b><a href="#home" class="ml-2 badge badge-primary">Home</a></div>
+			  <div class="card-body">
+				<h5 class="card-title mb-2 text-primary">The MNIST dataset</h5>
+				<p class="card-text">Our model is trained using the famous <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset. MNIST is a hand-written digit dataset. The training set of MNIST contains 60,000 images and the test set 10,000 images. The test set is not used for training but for evaluation to see how good the model is. The pictures in the MNIST dataset are centered and normalized to the same size.</p>
+				<h5 class="card-title mb-2 text-primary">The model</h5>
+				<pre class="card-text bg-light">
+____________________________________________
+Layer (type)                 Output shape   
+============================================
+conv2d_Conv2D1 (Conv2D)      [null,26,26,32]
+____________________________________________
+conv2d_Conv2D2 (Conv2D)      [null,24,24,32]
+____________________________________________
+max_pooling2d_MaxPooling2D1  [null,12,12,32]
+____________________________________________
+conv2d_Conv2D3 (Conv2D)      [null,10,10,64]
+____________________________________________
+conv2d_Conv2D4 (Conv2D)      [null,8,8,64]  
+____________________________________________
+max_pooling2d_MaxPooling2D2  [null,4,4,64]  
+____________________________________________
+flatten_Flatten1 (Flatten)   [null,1024]    
+____________________________________________
+dropout_Dropout1 (Dropout)   [null,1024]    
+____________________________________________
+dense_Dense1 (Dense)         [null,512]     
+____________________________________________
+dropout_Dropout2 (Dropout)   [null,512]    
+____________________________________________
+dense_Dense2 (Dense)         [null,10]      
+============================================
+Total params: 594922
+Trainable params: 594922
+Non-trainable params: 0
+				</pre>
+				<p class="card-text">
+				At prediction time the pixel-values of our image are the input to the first Conv2D-layer. The output of one layer is the input to the next. In the end we have 
+				a layer with just 10 values as output. Those 10 values are transformed into our 10 prediction values (the probabilities).
+				</p>
+				The layers have different roles:
+				<ul>
+					<li><b>Conv2D:</b> Performs an image-to-image transform using "sliding filters". You can see that the dimensions of the "image" changes. 
+					This layer is complicated and hard to describe (at least for me).</li>
+				</ul>
+				<ul>
+					<li><b>MaxPooling2D:</b> Reduces the size of the tensor by just keeping the max value within a certain area (uses also "sliding filters").</li>
+				</ul>
+				<ul>
+					<li><b>Flatten:</b> Flattens a multi-dimension tensor into a single-dimension. Here 4*4*64=1,024.</li>
+				</ul>
+				<ul>
+					<li><b>Dropout:</b> The dropout layer randomly sets some output values to zero. The other input values keep their values on output.  
+					Reduces the risk of over-fitting. Over-fitting means that the parameters are adapted too much to the training data. 
+					The accuracy on training data is maybe 100% but lower on the test data. Over-fitting is a common problem. Dropout is only active 
+					during training.</li>
+				</ul>
+				<ul>
+					<li><b>Dense:</b> The dense layers improves the output from the Conv2D layers. You can have a model with just dense layers but the result will not be as good as with this model.</li>
+				</ul>
+				
+				
+				
+			  	<h5 class="card-title mb-2 text-primary">Training</h5>
+				<p class="card-text">
+				Before any prediction is possible the 594,922 parameters of the model must have proper values i.e. the model must be trained. 
+				The training process tries to minimize the loss value. The process is complicated but is done by Tensorflow.
+				</p>
+				<p>We can see that we get an accuracy on the test set of 99.4%.</p>
+				<pre class="card-text bg-light">
+Epoch 1 / 15
+eta=0.6 =========================================> 
+acc=0.964 loss=0.134
+237005ms 4647us/step - 
+acc=0.921 loss=0.245 val_acc=0.979 val_loss=0.0704
+Epoch 2 / 15
+eta=0.7 =========================================> 
+acc=0.964 loss=0.0486
+271554ms 5325us/step - 
+acc=0.978 loss=0.0676 val_acc=0.989 val_loss=0.0384
+...................................................
+Epoch 14 / 15
+eta=0.7 ==========================================> 
+acc=1.00 loss=0.000358
+560396ms 5494us/step - 
+acc=0.996 loss=0.0114 val_acc=0.994 val_loss=0.0275
+Epoch 15 / 15
+eta=0.7 ==========================================> 
+acc=1.00 loss=0.0000813
+580674ms 5693us/step - 
+acc=0.997 loss=0.0107 val_acc=0.994 val_loss=0.0277
+
+Evaluation result:
+  Loss = 0.022; Accuracy = 0.994  
+				</pre>
+
+				<h5 class="card-title mb-2 text-primary">Implementation</h5>
+				<p class="card-text">
+				The app is written in JavaScript using <a href="https://js.tensorflow.org">TensorFlow.js</a> for "Machine Learning" and Bootstrap for the UI. All code related to the app is run in the 
+				browser. The web server is only keeping the files of the app. The files (including the model) are downloaded to the browser. So the predictions are 
+				done in the browser. But the training is done outside of the browser because the model is rather large.
+				</p>
+
+				<p class="card-text">
+				The software of this app is available at <a href="https://github.com/KjelleJ/DigitApp">GitHub</a>.
+				</p>
+				
+<pre>				
+Copyright 2019 GubboIT
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</pre>
+				<h5 class="card-title mb-2 text-primary">Acknowledgment</h5>
+				<p class="card-text">
+				This app was inspired by the excellent book "Deep Learning with JavaScript" from <a href="https://www.manning.com">Mannning Publications</a>.
+				</p>
+				
+				<a href="#home" class="ml-2 badge badge-primary">Home</a>
+			</div>	<!-- end body text -->
+			
+
+			</div> <!-- END RIGHT SIDE -->
+
+		</div> <!-- END ROW -->
+
+	</div> <!-- end container -->
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script src="index.js"></script>
+  </body>
+</html>
