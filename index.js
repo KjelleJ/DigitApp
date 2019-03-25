@@ -4,11 +4,16 @@ tf.ENV.set('WEBGL_PACK', false); // fix Edge problem
 var fillStyle = "#000000"; //  black
 var strokeStyle = "#FFFFFF"; //  white
 
+var rimage = new Image(); // image saved for rotation
+var rangle = 0; // angle for rotatation
+
 const click = document.getElementById("click_sound"); 
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var crect = canvas.getBoundingClientRect();
+
+var inter; // 360 running
 
 var model_name = "white";
 var histo_toggle = 0;
@@ -31,10 +36,13 @@ document.getElementById("left_btn").addEventListener("click", left);
 document.getElementById("right_btn").addEventListener("click", right);
 document.getElementById("up_btn").addEventListener("click", up);
 document.getElementById("down_btn").addEventListener("click", down);
-document.getElementById("predict_btn").addEventListener("click", predict);
+document.getElementById("predict_btn").addEventListener("click", predict_btn);
 document.getElementById("toggle_btn").addEventListener("click", toggle);
 document.getElementById("zoom_in_btn").addEventListener("click", zoom_in);
 document.getElementById("zoom_out_btn").addEventListener("click", zoom_out);
+document.getElementById("rright_btn").addEventListener("click", rright);
+document.getElementById("rleft_btn").addEventListener("click", rleft);
+document.getElementById("r360_btn").addEventListener("click", r360);
 
 document.getElementById('canvas').addEventListener("touchstart", setTouchPos, true);
 document.getElementById('canvas').addEventListener("touchmove", touchDraw, true);
@@ -74,6 +82,7 @@ function draw(e) {
   setPosition(e);
   ctx.lineTo(pos.x, pos.y); // to
   ctx.stroke(); // draw it!
+  reset_rot();
 }
 
 function touchDraw(e) {
@@ -85,18 +94,21 @@ function touchDraw(e) {
   ctx.lineTo(pos.x, pos.y); // to
   ctx.stroke(); // draw it!
   event.preventDefault();
+  reset_rot();
 }
 
 // resize - handle screen rotation - not handled
 
 function resize() {
 	crect = canvas.getBoundingClientRect();
+	reset_rot();
 }
 
 
 //--------------------- Presentation functions ---------------------------------------
 function clear() {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	reset_rot();
 	document.getElementById("model").innerHTML = model_name;
 }
 
@@ -113,24 +125,28 @@ function right() {
 	var cData = ctx.getImageData(0, 0, canvas.width - 5, canvas.height);
 	ctx.putImageData(cData, 5, 0);
 	ctx.fillRect(0, 0, 5, canvas.height);	
+	reset_rot();
 }
 
 function left() {
 	var cData = ctx.getImageData(5, 0, canvas.width, canvas.height);
 	ctx.putImageData(cData, 0, 0);
 	ctx.fillRect(canvas.width - 5, 0, canvas.width, canvas.height);	
+	reset_rot();
 }
 
 function up() {
 	var cData = ctx.getImageData(0, 5, canvas.width, canvas.height);
 	ctx.putImageData(cData, 0, 0);
-	ctx.fillRect(0, canvas.height - 5, canvas.width, canvas.height);	
+	ctx.fillRect(0, canvas.height - 5, canvas.width, canvas.height);
+	reset_rot();	
 }
 
 function down() {
 	var cData = ctx.getImageData(0, 0, canvas.width, canvas.height - 5);
 	ctx.putImageData(cData, 0, 5);
 	ctx.fillRect(0, 0, canvas.width, 5);	
+	reset_rot();
 }
 
 function inverse() {
@@ -148,6 +164,7 @@ function inverse() {
 	  cdata[i+2] = 255 - cdata[i+2];
     }
 	ctx.putImageData(cData, 0, 0);
+	reset_rot();
 }
 
 function zoom_out() {
@@ -157,12 +174,55 @@ function zoom_out() {
 	ctx.fillRect(0, canvas.height - 10, canvas.width, canvas.height);
 	ctx.fillRect(0, 0, 10, canvas.height);
 	ctx.fillRect(canvas.width - 10, 0, canvas.width, canvas.height);
+	reset_rot();
 }
 
 function zoom_in() {
 	//var cData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	ctx.drawImage(canvas, 10, 10 , canvas.width - 20, canvas.height - 20, 0, 0, canvas.width, canvas.height);
-	
+	reset_rot();	
+}
+
+function rright() {
+	rangle = rangle + 10;
+	rotate(rangle);
+}
+
+function rleft() {
+	rangle = rangle - 10;	
+	rotate(rangle);
+}
+
+function r360() {
+	var r360_btn = document.getElementById('r360_btn')	
+	if (inter != null) {
+		clearInterval(inter);
+		r360_btn.innerHTML ='360';
+		inter = null;
+	} else {
+		var rright_btn = document.getElementById("rright_btn");
+		r360_btn.innerHTML = 'Stop';
+		var i = 1;
+		inter = setInterval(function(){ 
+			rright_btn.click();
+			predict(0);
+			if (i == 36) r360_btn.click();
+			i++;
+		}, 500);
+	}
+}
+
+function rotate(angle) {
+	ctx.save(); // save current coord system
+	ctx.translate(canvas.width/2, canvas.height/2); // move to middle of canvas
+	ctx.rotate(angle * Math.PI / 180); // rotate
+	ctx.drawImage(rimage, -(rimage.width/2), -(rimage.height/2)); // will be rotated
+	ctx.restore();
+}
+
+function reset_rot() {
+	rimage.src = canvas.toDataURL('image/png', 1.0); // save canvas as image
+	rangle = 0;
 }
 
 function histo(prediction) {
@@ -173,7 +233,6 @@ function histo(prediction) {
 		if (num < 0.0001) num = 0.0;
 		result[i] = num.toFixed(2);	
 	}
-	//console.log(preds);
 	document.getElementById("pred").innerHTML = 'Digit: ' + prediction;
 	var results ='';
 	var sec = '<span id="res" class="badge badge-secondary">';
@@ -201,8 +260,6 @@ function histo(prediction) {
 	hctx.textBaseline = "bottom";
 	hctx.font = "20px Arial";
 	for (var i=0; i < 10; i++) {
-		//console.log(i*20); 
-		//console.log(histo.height - parseInt(result[i]*histo.height));
 		hctx.fillRect(i*20, histo.height - parseInt(result[i]*histo.height), 20, parseInt(result[i]*histo.height));
 		hctx.strokeText(i, i*20+3, histo.height/2); 
 	}
@@ -215,8 +272,12 @@ function load_model() {
 	});
 }
 
-function predict() {
-	click.play();
+function predict_btn() {
+	predict(1);
+}
+
+function predict(sound) {
+	if (sound) click.play();
 	var cData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	var cdata = cData.data;	
 	for (var i = 0; i < cdata.length; i += 4) { // to grayscale

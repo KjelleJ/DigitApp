@@ -21,7 +21,7 @@
 		<div class="row">
 		<div class="col"> <!-- LEFT SIDE -->
 		<div class="row">
-			<div class="col">
+			<div class="col" id="p_canvas">
 
 				<canvas id="canvas" width="200" height="200" style="border:1px solid #0000FF;"></canvas>
 			</div>
@@ -51,7 +51,9 @@
 				<button type="button" class="btn btn-secondary mt-1 mr-1" id="down_btn">&dArr;</button>
 				<button type="button" class="btn btn-secondary mt-1 mr-1" id="zoom_out_btn"><b>-</b></button>
 				<button type="button" class="btn btn-secondary mt-1 " id="zoom_in_btn"><b>+</b></button>
-				
+				<button type="button" class="btn btn-secondary mt-1 " id="rright_btn">&#x21BB;</button>
+				<button type="button" class="btn btn-secondary mt-1 " id="rleft_btn">&#x21BA;</button>
+				<button type="button" class="btn btn-secondary mt-1 " id="r360_btn"><b>360</b></button>							
 				<div class="dropdown">
 					<button class="btn btn-secondary dropdown-toggle my-2" type="button" data-toggle="dropdown">Actions/Help</button>
 						<div class="dropdown-menu">
@@ -94,6 +96,9 @@
 					<li class="list-group-item"><b>Histogram:</b> Histogram of the predictions.</li>
 					<li class="list-group-item"><b>Arrow buttons:</b> Moves the drawn digit.</li>
 					<li class="list-group-item"><b>-/+:</b> Zoom out or zoom in the drawing area.</li>
+					<li class="list-group-item"><b>Rotate buttons:</b> Rotates the drawn digit 10 degrees.</li>
+					<li class="list-group-item"><b>360 button:</b> Rotates the drawn digit 360 degrees. <b>Predict</b> after each 
+					10 degrees. <b>Stop</b> to stop.</li>						
 					<li class="list-group-item"><b>Invert button(Actions/Help):</b> Invert the colours of the drawing area (and image).</li>
 					<li class="list-group-item"><b>Toggle model button (Actions/Help):</b> Use the other model for predictions.</li>					  
 				</ul>
@@ -118,7 +123,9 @@
 						The reason is probably that the training data is blurred because it is not produced in the same artificial way as in our 
 						drawing area.</li>
 					<li class="list-group-item"><b>Real probabilities?</b> Are the predictions real probabilities? Probably not. When the drawing area is empty and the model is
-						<b>black_white</b> then the prediction for digit 1 is around 0.4. How to interpret?</li>		
+						<b>black_white</b> then the prediction for digit 1 is around 0.4. How to interpret?</li>
+					<li class="list-group-item"><b>6 or 9?</b> Draw the digit 6. Then <b>360</b> and see how the prediction 
+					goes from 6 to something else, then 9 for a while, and then back to 6.</li>							
 				</ul>
 				<a href="#home" class="ml-2 badge badge-primary">Home</a>
 		  </div>
@@ -129,7 +136,7 @@
 			  <div id="more_info" class="card-header text-center"><b>MORE INFO</b><a href="#home" class="ml-2 badge badge-primary">Home</a></div>
 			  <div class="card-body">
 				<h5 class="card-title mb-2 text-primary">The MNIST dataset</h5>
-				<p class="card-text">Our model is trained using the famous <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset. MNIST is a hand-written digit dataset. The training set of MNIST contains 60,000 images and the test set 10,000 images. The test set is not used for training but for evaluation to see how good the model is. The pictures in the MNIST dataset are centered and normalized to the same size.</p>
+				<p class="card-text">Our model is trained using the famous <a href="http://yann.lecun.com/exdb/mnist/">MNIST</a> dataset. MNIST is a hand-written digit dataset. The training set of MNIST contains 60,000 images and the test set 10,000 images. The test set is not used for training but for evaluation to see how good the model is. The pictures in the MNIST dataset are centered and normalized to the same size. This is why "position and size matters".</p>
 				<h5 class="card-title mb-2 text-primary">The model</h5>
 				<pre class="card-text bg-light">
 ____________________________________________
@@ -183,7 +190,8 @@ Non-trainable params: 0
 					during training.</li>
 				</ul>
 				<ul>
-					<li><b>Dense:</b> The dense layers improves the output from the Conv2D layers. You can have a model with just dense layers but the result will not be as good as with this model.</li>
+					<li><b>Dense:</b> The dense layers improves the output from the Conv2D layers. You can have a model with just dense layers but the result will not be as good as with this model. In fact before the neural networks other machine learning techniques were used 
+					with good result.</li>
 				</ul>
 				
 				
@@ -229,7 +237,7 @@ Evaluation result:
 				</p>
 
 				<p class="card-text">
-				The software of this app is available at <a href="https://github.com/KjelleJ/DigitApp">GitHub</a>.
+				The source code of this app is available at <a href="https://github.com/KjelleJ/DigitApp">GitHub</a> where you can inspect the code.
 				</p>
 				
 <pre>				
