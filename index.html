@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en"> 
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -31,7 +31,7 @@
 						<div class="card-title"><b>Draw a digit 0-9...</b></div>
 						<button type="button" class="btn btn-primary mr-2" id="predict_btn">Predict</button>
 						<button type="button" class="btn btn-secondary" id="clear_btn">Clear</button>			
-						<h5 class="mt-2"><span id="pred" class="badge badge-success mr-2">Digit: ?</span><span id="model" class="badge badge-secondary">?</span></h5>
+						<h5 class="mt-2"><span id="pred" class="badge badge-success mr-2">Digit: ?</span><span id="model" class="badge badge-secondary mr-2">?</span></h5>
 						<h6 id="res"></h6>				
 					</div>
 				</div>
@@ -59,6 +59,8 @@
 						<div class="dropdown-menu">
 							<button class="dropdown-item" type="button" id="inverse_btn">Invert</button>
 							<button class="dropdown-item" type="button" id="toggle_btn">Toggle model</button>
+							<button class="dropdown-item" type="button" id="norm_btn">Normalize</button>
+							<button class="dropdown-item" type="button" id="eraser_btn">Toggle pen/eraser</button>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="#help">Help</a>
 							<a class="dropdown-item" href="#more_info">More info</a>
@@ -73,7 +75,9 @@
 				<h5 class="card-title mb-2 text-primary">Get started</h5>		  
 				<p class="card-text">This app demonstrates <b>Digit Recognition</b> using <b>Deep Learning</b>. 
 				Draw a digit 0-9 (centered and not too small) in the drawing area then <b>Predict</b> and you will get a
-					prediction - a digit 0-9. Draw digits (bad or good) and use the buttons to modify the image to be predicted.</p>
+					prediction - a digit 0-9. Draw digits (bad or good) and use the buttons to modify the image to be predicted. 
+					<b>Note:</b> If you want a better prediction at once use <b>Normalize</b> under <b>Actions/Help</b> before 
+					<b>Predict</b>.</p>
 				<h5 class="card-title mb-2 text-primary">How does it work?</h5>
 				<p class="card-text">The pixels (value is 0-255) of the drawn image is input to a <b>model</b> that transforms the input pixels 
 					(number of pixles is 784) into 10 values (the predictions) that can be interpreted as the probability that the drawn 
@@ -96,18 +100,27 @@
 					<li class="list-group-item"><b>Histogram:</b> Histogram of the predictions.</li>
 					<li class="list-group-item"><b>Arrow buttons:</b> Moves the drawn digit.</li>
 					<li class="list-group-item"><b>-/+:</b> Zoom out or zoom in the drawing area.</li>
-					<li class="list-group-item"><b>Rotate buttons:</b> Rotates the drawn digit 10 degrees.</li>
+					<li class="list-group-item"><b>Rotate buttons:</b> Rotates the drawn digit 10 degrees. Rotate is only working 
+					as expected if the digit is centered.</li>
 					<li class="list-group-item"><b>360 button:</b> Rotates the drawn digit 360 degrees. <b>Predict</b> after each 
 					10 degrees. <b>Stop</b> to stop.</li>						
 					<li class="list-group-item"><b>Invert button(Actions/Help):</b> Invert the colours of the drawing area (and image).</li>
-					<li class="list-group-item"><b>Toggle model button (Actions/Help):</b> Use the other model for predictions.</li>					  
+					<li class="list-group-item"><b>Toggle model button (Actions/Help):</b> Use the other model for predictions.</li>
+					<li class="list-group-item"><b>Normalize button (Actions/Help):</b> Normalizes the drawn digit. Means that 
+					the size of the digit is changed to what our model likes (i.e. what our model is trained on). 
+					The digit is also centered.</li>
+					<li class="list-group-item"><b>Toggle pen/eraser button (Actions/Help):</b> Use pen or eraser.</li>					
 				</ul>
 				
 				<h5 class="card-title my-2 text-primary">Some findings</h5>
 				<p class="card-text">Among the findings below there are some shortcomings but don't worry there are ways (not describe here) 
 				to handle the problems.</p>
 				<ul class="list-group">
-					<li class="list-group-item"><b>Digit 1 is hard.</b> Digit 1 seems to be hardest to predict.</li>
+					<li class="list-group-item"><b>Normalization is good.</b> Draw a digit and then <b>Predict</b>. 
+					Now <b>Normalize</b> (under <b>Actions/Help</b>), then <b>Predict</b> and the prediction is almost always improved. 
+					The reason is that the normalization makes the digit more similar to the digits our model is trained on.</li>
+					<li class="list-group-item"><b>Digit 1 is hard</b> (no normalization). Digit 1 seems to be the 
+					hardest one to predict. Or?</li>				
 					<li class="list-group-item"><b>Size matters.</b> Draw a digit and use <b>Predict</b>  and <b>- (zoom out)</b>  a number of times and see how the 
 						histogram changes.</li>
 					<li class="list-group-item"><b>Position matters.</b>  Draw a digit and use <b>Predict</b>  and the <b>arrow buttons</b>  a number of times and see how the 
@@ -115,17 +128,21 @@
 					<li class="list-group-item"><b>Colour matters.</b> Use model <b>white</b>. Draw a digit and then <b>Predict</b>. Now <b>Invert</b> 
 						(under <b>Actions/Help</b>). <b>Predict</b> again and the histogram should indicate a worse prediction. Now <b>Toggle model</b> 
 						(under <b>Actions/Help</b>) to the <b>black_white</b> model. <b>Predict</b> again and the prediction should be improved.</li>
-					<li class="list-group-item"><b>Model black_white is better.</b> Use model <b>white</b>. Draw a digit and position the digit to get a 
+					<li class="list-group-item"><b>More training data is better</b>  (no normalization). Use model <b>white</b>. 
+					Draw a digit and position the digit to get a 
 						worse prediction. <b>Toggle model</b> and <b>Predict</b> and now the prediction should be improved. The reason is that model black_white is 
 						trained on more data.</li>
-					<li class="list-group-item"><b>Blurring is good.</b> Draw a digit and position the digit to get a worse prediction. 
+					<li class="list-group-item"><b>Blurring is good</b> (no normalization). Draw a digit and position the 
+					digit to get a worse prediction. 
 						<b>+ (zoom in)</b> four times and then <b>- (zoom out)</b> four times. The digit is now a little blurred. <b>Predict</b> again and now the prediction improves. 
 						The reason is probably that the training data is blurred because it is not produced in the same artificial way as in our 
 						drawing area.</li>
 					<li class="list-group-item"><b>Real probabilities?</b> Are the predictions real probabilities? Probably not. When the drawing area is empty and the model is
 						<b>black_white</b> then the prediction for digit 1 is around 0.4. How to interpret?</li>
 					<li class="list-group-item"><b>6 or 9?</b> Draw the digit 6. Then <b>360</b> and see how the prediction 
-					goes from 6 to something else, then 9 for a while, and then back to 6.</li>							
+					goes from 6 to something else, then 9 for a while, and then back to 6.</li>	
+					<li class="list-group-item"><b>8 becomes 3.</b> Draw the digit 8 and then <b>Predict</b>. Use the <b>Eraser</b> 
+					(under <b>Actions/Help</b>) to erase parts of the digit 8 and see when the prediction turns into 3.</li>						
 				</ul>
 				<a href="#home" class="ml-2 badge badge-primary">Home</a>
 		  </div>
