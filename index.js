@@ -16,6 +16,7 @@ var crect = canvas.getBoundingClientRect();
 
 var inter; // 360 running
 var eraser = 0;
+var norm = 1; // normalize
 
 var model_name = "white";
 var histo_toggle = 0;
@@ -40,13 +41,14 @@ document.getElementById("up_btn").addEventListener("click", up);
 document.getElementById("down_btn").addEventListener("click", down);
 document.getElementById("predict_btn").addEventListener("click", predict_btn);
 document.getElementById("toggle_btn").addEventListener("click", toggle);
-document.getElementById("norm_btn").addEventListener("click", normalize);
+document.getElementById("toggle_norm_btn").addEventListener("click", toggle_normalize);
 document.getElementById("zoom_in_btn").addEventListener("click", zoom_in);
 document.getElementById("zoom_out_btn").addEventListener("click", zoom_out);
 document.getElementById("rright_btn").addEventListener("click", rright);
 document.getElementById("rleft_btn").addEventListener("click", rleft);
 document.getElementById("r360_btn").addEventListener("click", r360);
 document.getElementById("eraser_btn").addEventListener("click", toggle_eraser);
+document.getElementById("normalize_btn").addEventListener("click", normalize_action);
 
 document.getElementById('canvas').addEventListener("touchstart", setTouchPos, true);
 document.getElementById('canvas').addEventListener("touchmove", touchDraw, true);
@@ -82,7 +84,7 @@ function draw(e) {
   ctx.beginPath(); // begin
   ctx.lineWidth = lineWidth;
   if (eraser) {
-	ctx.lineWidth = 2*lineWidth;
+	ctx.lineWidth = 4*lineWidth;
 	ctx.strokeStyle = fillStyle;
   }
   ctx.lineCap = 'round';
@@ -101,7 +103,7 @@ function touchDraw(e) {
   ctx.beginPath(); // begin
   ctx.lineWidth = lineWidth;
    if (eraser) {
-	ctx.lineWidth = 2*lineWidth;
+	ctx.lineWidth = 4*lineWidth;
 	ctx.strokeStyle = fillStyle;
   } 
   ctx.lineCap = 'round';
@@ -138,6 +140,21 @@ function toggle() {
 		model_name = 'white';
 	document.getElementById("model").innerHTML = model_name;
 	load_model();
+}
+
+function toggle_normalize() {
+	var predict_btn = document.getElementById("predict_btn");
+	if (norm) {
+		norm = 0;
+		$("#predict_btn").removeClass("btn-danger").addClass("btn-primary");
+	//	predict_btn.classlist.remove("btn-danger");
+	//	predict_btn.classlist.add("btn-primary");
+	} else {
+		norm = 1;
+		$("#predict_btn").removeClass("btn-primary").addClass("btn-danger");
+		//predict_btn.classlist.remove("btn-primary");
+		//predict_btn.classlist.add("btn-danger");
+	}
 }
 
 function toggle_eraser() {
@@ -224,7 +241,6 @@ function rleft() {
 }
 
 function r360() {
-	predict(0);
 	var r360_btn = document.getElementById('r360_btn');	
 	if (inter != null) {
 		clearInterval(inter);
@@ -233,11 +249,13 @@ function r360() {
 	} else {
 		var rright_btn = document.getElementById("rright_btn");
 		r360_btn.innerHTML = 'Stop';
+		predict(0);
+		rright_btn.click();
 		var i = 1;
 		inter = setInterval(function(){ 
-			rright_btn.click();
 			predict(0);
-			if (i == 36) r360_btn.click();
+			rright_btn.click();
+			if (i == 35) r360_btn.click();
 			i++;
 		}, 500);
 	}
@@ -256,7 +274,11 @@ function reset_rot() {
 	rangle = 0;
 }
 
-function normalize() {
+function normalize_action() {
+	normalize(1); //with rectangle and timeout
+}
+
+function normalize(timeout) {
 	var lx, ty, rx, by; // bounding rectangle
 	var fix, lix;
 	var fillpix = 255;
@@ -270,8 +292,15 @@ function normalize() {
 	ty = getTy(cdata, fillpix, canvas.width, canvas.height);
 	by = getBy(cdata, fillpix, canvas.width, canvas.height);
 
-	draw_rect(lx - 2, ty - 2, rx + 2, by + 2, "#FF0000"); // bounding rectangle
-	setTimeout(function() {
+	if (timeout) {
+		draw_rect(lx - 2, ty - 2, rx + 2, by + 2, "#FF0000"); // bounding rectangle
+		setTimeout(function() { do_norm(lx, ty, rx, by);
+			}, 500); // end setTimeout
+	} else 
+		do_norm(lx, ty, rx, by);
+}
+
+function do_norm(lx, ty, rx, by) {
 		draw_rect(lx - 2, ty - 2, rx + 2, by + 2, fillStyle);
 
 		// We have 200x200, MNIST is 28x28 where the margin is 4 => Our margin should be around 28.
@@ -299,8 +328,7 @@ function normalize() {
 		ctx.fillRect(0, 0, ax, canvas.height);
 		ctx.fillRect(ax + aw, 0, canvas.width, canvas.height);
 		
-		reset_rot();
-	}, 500); // end setTimeout
+		reset_rot();	
 }
 
 function getTy(cdata, fillpix, width, height) {
@@ -406,7 +434,10 @@ function predict_btn() {
 }
 
 function predict(sound) {
-	if (sound) click.play();
+	if (sound) {
+		if (norm) normalize(0);
+		click.play();
+	}
 	var cData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	var cdata = cData.data;	
 	for (var i = 0; i < cdata.length; i += 4) { // to grayscale
